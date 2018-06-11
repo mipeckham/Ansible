@@ -1,0 +1,14 @@
+- hosts: win
+  gather_facts: no
+
+  tasks:
+  - win_updates:
+      category_names:
+        - CriticalUpdates
+        - SecurityUpdates
+        - UpdateRollups
+        - Updates
+    register: update_result
+
+  - win_reboot:
+    when: update_result.reboot_required
