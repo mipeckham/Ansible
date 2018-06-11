@@ -1,0 +1,35 @@
+
+---
+- name: Backup IOS Configs
+  hosts: cisco
+  gather_facts: false
+  connection: local
+
+  vars:
+      date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+
+  tasks:
+    - name: GET_CREDENTIALS
+      include_vars: XXXXX.yaml
+
+    - name: ESTABLISHING_CONNECTION
+      set_fact:
+         connection:
+            authorize: yes
+            host: "{{ inventory_hostname }}"
+            username: "{{ creds['username'] }}"
+            password: "{{ creds['password'] }}"
+            auth_pass: "{{ creds['auth_pass'] }}"
+
+    - name: BACKUP_RUNNING
+      ios_command:
+         provider: "{{ connection }}"
+         commands:
+           - show run
+
+      register: sho_run
+
+    - name: COPYING_CONFIGS
+      copy:
+         content: "{{ sho_run.stdout[0] }}"
+         dest: "CFGS/{{ inventory_hostname }}-{{ date }}.txt"
